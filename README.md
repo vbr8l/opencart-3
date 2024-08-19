@@ -4,5 +4,7 @@
 * cd opencart-3
 * docker-compose build
 * docker-compose up
+* opencart-my-store - Web Store UI
+* opencart-my-store/admin - Admin UI
 * http://localhost:9090 - Prometheus UI
 * http://localhost:9093 - Alertmanager UI
