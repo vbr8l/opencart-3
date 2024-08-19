@@ -1,0 +1,101 @@
+services:
+  # node_exporter MacOS config
+  node-exporter:
+    image: prom/node-exporter:v1.8.2
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - --collector.filesystem.ignored-mount-points
+      - "^/(sys|proc|dev|host|etc)($|/)"
+    ports:
+      - "9100:9100"
+    networks:
+      - app-network
+    restart: always
+    deploy:
+      mode: global
+
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:1.3.0
+    command:
+      - '--nginx.scrape-uri=http://frontend:8008/stub_status'
+    ports:
+      - "9113:9113"
+    networks:
+      - app-network
+    restart: always
+
+  php-fpm-exporter:
+    image: hipages/php-fpm_exporter:2.2.0
+    ports:
+      - "9253:9253"
+    networks:
+      - app-network
+    environment:
+      - PHP_FPM_SCRAPE_URI="tcp://php-fpm:9000/status"
+    restart: always
+
+  mysqld-exporter:
+    image: prom/mysqld-exporter:v0.15.1
+    volumes:
+      - ./conf/mysql/mysqld_exporter.cnf:/etc/mysql/.mysqld_exporter.cnf:ro
+    command:
+      - '--config.my-cnf=/etc/mysql/.mysqld_exporter.cnf'
+    ports:
+      - "9104:9104"
+    networks:
+      - app-network
+    restart: always
+
+  blackbox-exporter:
+    image: prom/blackbox-exporter:v0.25.0
+    volumes:
+      - ./conf/blackbox/config.yml:/etc/blackbox_exporter/config.yml:ro
+    command:
+      - '--config.file=/etc/blackbox_exporter/config.yml'
+    ports:
+      - "9115:9115"
+    networks:
+      - app-network
+    restart: always
+
+  prometheus-proxy:
+    image: haproxy:2.3
+    volumes:
+      - ./conf/haproxy:/usr/local/etc/haproxy:ro
+    networks:
+      - mon-network
+      - app-network
+    restart: always
+
+  prometheus-alertmanager:
+    image: prom/alertmanager:v0.27.0
+    volumes:
+      - ../GAP-1/alertmanager.yml:/etc/prometheus/alertmanager.yml
+    command:
+      - '--config.file=/etc/prometheus/alertmanager.yml'
+    ports:
+      - "9093:9093"
+    networks:
+      - mon-network
+    restart: always
+
+  prometheus-server:
+    image: prom/prometheus:v2.53.2
+    volumes:
+      - ../GAP-1/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ../GAP-1/rules.yml:/etc/prometheus/rules.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    ports:
+      - "9090:9090"
+    networks:
+      - mon-network
+    restart: always

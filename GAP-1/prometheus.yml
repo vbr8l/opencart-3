@@ -1,0 +1,104 @@
+global:
+  # How frequently to scrape targets
+  scrape_interval:     1m
+  # How frequently to evaluate rules
+  evaluation_interval: 30s
+
+# Rules and alerts are read from the specified file(s)
+rule_files:
+  - rules.yml
+
+# Alerting specifies settings related to the Alertmanager
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - prometheus-alertmanager:9093
+
+# A list of scrape configurations that specifies a set of
+# targets and parameters describing how to scrape them.
+scrape_configs:
+  - job_name: 'prometheus_server'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['prometheus-server:9090']
+
+  - job_name: 'node_exporter'
+    scheme: https
+    basic_auth:
+      username: prom_mon_user
+      password: prom_mon_user
+    tls_config:
+      insecure_skip_verify: true
+    metrics_path: /node-exporter/
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['prometheus-proxy']
+
+  - job_name: 'nginx_exporter'
+    scheme: https
+    basic_auth:
+      username: prom_mon_user
+      password: prom_mon_user
+    tls_config:
+      insecure_skip_verify: true
+    metrics_path: /nginx-exporter/
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['prometheus-proxy']
+        labels:
+          scrape_uri: 'http://frontend:8008/stub_status'
+
+  - job_name: 'php-fpm_exporter'
+    scheme: https
+    basic_auth:
+      username: prom_mon_user
+      password: prom_mon_user
+    tls_config:
+      insecure_skip_verify: true
+    metrics_path: /php-fpm-exporter/
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['prometheus-proxy']
+
+  - job_name: 'mysqld_exporter'
+    scheme: https
+    basic_auth:
+      username: prom_mon_user
+      password: prom_mon_user
+    tls_config:
+      insecure_skip_verify: true
+    metrics_path: /mysqld-exporter
+    scrape_interval: 5s
+    static_configs:
+      - targets:
+          - database:3306
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: prometheus-proxy
+
+  - job_name: 'blackbox_exporter'
+    scheme: https
+    basic_auth:
+      username: prom_mon_user
+      password: prom_mon_user
+    tls_config:
+      insecure_skip_verify: true
+    metrics_path: /blackbox-exporter
+    params:
+      module: [http_2xx]
+    scrape_interval: 5s
+    static_configs:
+      - targets:
+        - https://frontend
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: prometheus-proxy

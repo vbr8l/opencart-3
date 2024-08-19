@@ -1,0 +1,12 @@
+networks:
+  app-network:
+    driver: bridge
+  mon-network:
+    driver: bridge
+
+volumes:
+  db_data_opencart-3:
+
+include:
+  - ./prod/docker-app-compose.yml
+  - ./prod/docker-mon-compose.yml
