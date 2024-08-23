@@ -8,3 +8,4 @@
 * opencart-my-store/admin - Admin UI
 * http://localhost:9090 - Prometheus UI
 * http://localhost:9093 - Alertmanager UI
+* http://localhost:8428 - VictoriaMetrics UI
