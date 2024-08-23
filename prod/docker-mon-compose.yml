@@ -99,3 +99,16 @@ services:
     networks:
       - mon-network
     restart: always
+
+  victoria-metrics:
+    image: victoriametrics/victoria-metrics:v1.102.0
+    volumes:
+      - db_data_victoriametrics:/victoria-metrics-data
+    command:
+      - "--storageDataPath=/victoria-metrics-data"
+      - "--retentionPeriod=2w"
+    ports:
+      - "8428:8428"
+    networks:
+      - mon-network
+    restart: always

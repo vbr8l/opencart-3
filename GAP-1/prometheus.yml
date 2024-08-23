@@ -3,6 +3,13 @@ global:
   scrape_interval:     1m
   # How frequently to evaluate rules
   evaluation_interval: 30s
+  # Add label to each sample before sending it to remote storage
+  external_labels:
+    site: prod
+
+# Send data to VictoriaMetrics
+remote_write:
+  - url: http://victoria-metrics:8428/api/v1/write
 
 # Rules and alerts are read from the specified file(s)
 rule_files:
@@ -48,6 +55,9 @@ scrape_configs:
       - targets: ['prometheus-proxy']
         labels:
           scrape_uri: 'http://frontend:8008/stub_status'
+    relabel_configs:
+      - source_labels: [scrape_uri]
+        target_label: instance
 
   - job_name: 'php-fpm_exporter'
     scheme: https

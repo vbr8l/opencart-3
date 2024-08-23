@@ -6,6 +6,7 @@ networks:
 
 volumes:
   db_data_opencart-3:
+  db_data_victoriametrics:
 
 include:
   - ./prod/docker-app-compose.yml
