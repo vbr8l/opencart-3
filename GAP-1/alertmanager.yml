@@ -13,33 +13,39 @@ global:
   webex_api_url: https://webexapis.com/v1/messages
 
 route:
-  receiver: web.hook
-  group_by:
-    - alertname
+  receiver: telegram.channel.warning
+  group_by: [alertname]
   continue: false
   group_wait: 30s
   group_interval: 5m
   repeat_interval: 1h
+  routes:
+    - receiver: 'telegram.channel.critical'
+      match:
+        severity: critical
+    - receiver: 'telegram.channel.warning'
+      match:
+        severity: warning
 
 inhibit_rules:
   - source_match:
-      severity: critical
+      severity: 'critical'
+      alertname: PrometheusConfigurationReload
     target_match:
-      severity: warning
-    equal:
-      - alertname
-      - dev
-      - instance
+      severity: 'error'
 
 receivers:
-  - name: web.hook
-    webhook_configs:
-      - send_resolved: true
-        http_config:
-          follow_redirects: true
-          enable_http2: true
-        url: <secret>
-        url_file: ""
-        max_alerts: 0
+  - name: telegram.channel.critical
+    telegram_configs:
+      - bot_token: 7249040814:AAG903y3N0SQFa2r_KtslPUL6sQPtXyFQnE
+        api_url: https://api.telegram.org
+        chat_id: -1002209045779
+        parse_mode: ''
+  - name: telegram.channel.warning
+    telegram_configs:
+      - bot_token: 7249040814:AAG903y3N0SQFa2r_KtslPUL6sQPtXyFQnE
+        api_url: https://api.telegram.org
+        chat_id: -1002195446054
+        parse_mode: ''
 
 templates: []
