@@ -14,7 +14,7 @@ services:
     ports:
       - "9100:9100"
     networks:
-      - app-network
+      - cms-network
     restart: always
     deploy:
       mode: global
@@ -26,7 +26,7 @@ services:
     ports:
       - "9113:9113"
     networks:
-      - app-network
+      - cms-network
     restart: always
 
   php-fpm-exporter:
@@ -34,7 +34,7 @@ services:
     ports:
       - "9253:9253"
     networks:
-      - app-network
+      - cms-network
     environment:
       - PHP_FPM_SCRAPE_URI="tcp://php-fpm:9000/status"
     restart: always
@@ -48,7 +48,7 @@ services:
     ports:
       - "9104:9104"
     networks:
-      - app-network
+      - cms-network
     restart: always
 
   blackbox-exporter:
@@ -60,7 +60,7 @@ services:
     ports:
       - "9115:9115"
     networks:
-      - app-network
+      - cms-network
     restart: always
 
   prometheus-proxy:
@@ -69,7 +69,7 @@ services:
       - ./conf/haproxy:/usr/local/etc/haproxy:ro
     networks:
       - mon-network
-      - app-network
+      - cms-network
     restart: always
 
   prometheus-alertmanager:
@@ -109,6 +109,18 @@ services:
       - "--retentionPeriod=2w"
     ports:
       - "8428:8428"
+    networks:
+      - mon-network
+    restart: always
+
+  grafana-server:
+    image: grafana/grafana:11.2.0
+    volumes:
+      - db_data_grafana:/var/lib/grafana:rw
+      - ./conf/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./conf/grafana/dashboards:/var/lib/grafana/dashboards
+    ports:
+      - "3000:3000"
     networks:
       - mon-network
     restart: always

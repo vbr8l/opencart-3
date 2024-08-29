@@ -29,6 +29,9 @@ scrape_configs:
     scrape_interval: 5s
     static_configs:
       - targets: ['prometheus-server:9090']
+    relabel_configs:
+      - target_label: instance
+        replacement: mon_prometheus-server
 
   - job_name: 'node_exporter'
     scheme: https
@@ -41,6 +44,9 @@ scrape_configs:
     scrape_interval: 5s
     static_configs:
       - targets: ['prometheus-proxy']
+    relabel_configs:
+      - target_label: instance
+        replacement: cms_node
 
   - job_name: 'nginx_exporter'
     scheme: https
@@ -56,8 +62,8 @@ scrape_configs:
         labels:
           scrape_uri: 'http://frontend:8008/stub_status'
     relabel_configs:
-      - source_labels: [scrape_uri]
-        target_label: instance
+      - target_label: instance
+        replacement: cms_frontend
 
   - job_name: 'php-fpm_exporter'
     scheme: https
@@ -70,6 +76,9 @@ scrape_configs:
     scrape_interval: 5s
     static_configs:
       - targets: ['prometheus-proxy']
+    relabel_configs:
+      - target_label: instance
+        replacement: cms_php-fpm
 
   - job_name: 'mysqld_exporter'
     scheme: https
@@ -86,8 +95,8 @@ scrape_configs:
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
-      - source_labels: [__param_target]
-        target_label: instance
+      - target_label: instance
+        replacement: cms_database
       - target_label: __address__
         replacement: prometheus-proxy
 
@@ -103,12 +112,13 @@ scrape_configs:
       module: [http_2xx]
     scrape_interval: 5s
     static_configs:
-      - targets:
-        - https://frontend
+      - targets: [https://frontend]
+        labels:
+          scrape_uri: 'https://frontend'
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
-      - source_labels: [__param_target]
-        target_label: instance
+      - target_label: instance
+        replacement: cms_frontend
       - target_label: __address__
         replacement: prometheus-proxy

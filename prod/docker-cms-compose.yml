@@ -11,7 +11,7 @@ services:
       - "80:80"
       - "443:443"
     networks:
-      - app-network
+      - cms-network
     environment:
       - FASTCGI_PASS_HOST=php-fpm
       - NGINX_HOST=opencart-my-store
@@ -33,7 +33,7 @@ services:
     ports:
       - "9000:9000"
     networks:
-      - app-network
+      - cms-network
     depends_on:
       - database
     command: >
@@ -55,7 +55,7 @@ services:
     ports:
       - "3306:3306"
     networks:
-      - app-network
+      - cms-network
     environment:
       MYSQL_ROOT_PASSWORD: 'qEmMVrRxEHdRWbdM'
       MYSQL_DATABASE: 'opencart3'
