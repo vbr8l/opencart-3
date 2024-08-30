@@ -1,4 +1,4 @@
-# HW opencart-3
+# HW CMS opencart-3
 ## Steps:
 * git clone [opencart-3](https://github.com/vbr8l/opencart-3.git)
 * cd opencart-3
